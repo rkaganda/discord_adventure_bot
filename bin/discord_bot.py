@@ -16,16 +16,32 @@ client = discord.Client()
 
 
 def print_help(message, user: Dict) -> str:
-    return "$new to start a new adventure, $last to see the last message/choice of your adventure".format(
+    return "$start to start a new adventure, $choices to see of your current adventure.".format(
         message.author)
 
 
-def new_adventure(message, user: Dict) -> str:
-    return "There are no adventures to be had at the moment."
+def do_new_command(message, user: Dict):
+    response_message = ""
+    adventure_names = adventures.get_adventures()
+    if user['current_adventure'] is not None:  # if user is already on an adventure
+        response_message = "you are already on an adventure."
+    elif len(message.content.split(' ')) < 2:  # if no new adventure was chosen
+        if len(adventure_names) > 0:
+            response_message = "type $start and then the name of the adventure you want to start ({}).".format(
+                ", ".join(map(str, adventure_names)))
+        else:
+            response_message = " there are no adventures at this time."
+    else:
+        adventure_name = message.content.split(' ')[1]
+        if adventure_name in adventure_names:
+            response_message = adventures.start_adventure(user, adventure_name)
+        else:
+            response_message = "there is no adventure called {}.".format(adventure_name)
+    return response_message
 
 
 def print_branch(message, user: Dict) -> str:
-    return "You are not currently on an adventure."
+    return adventures.do_branch(user=user)
 
 
 def add_adventure(message, user: Dict) -> str:
@@ -51,25 +67,29 @@ async def on_ready():
 @client.event
 async def on_message(message):
     try:
-        logger.debug(message)
-        bot_commands = {
-            '$help': print_help,
-            '$new': new_adventure,
-            '$last': print_branch,
-            '$add': add_adventure
-        }
-
         # if this is the bot
         if message.author == client.user:
             return
+        bot_commands = {
+            '$help': print_help,
+            '$start': do_new_command,
+            '$choices': print_branch,
+            '$add': add_adventure
+        }
+
+        bot_command = message.content.split(' ')[0]
+        user = db.get_discord_user("{}#{}".format(message.author.name, message.author.discriminator))
+        adventure_choices = adventures.get_user_choices(user)
+
+        if message.content in adventure_choices:
+            await message.channel.send(
+                "@{} {}".format(message.author, adventures.do_choice(user=user, choice=message.content)))
         # if the message is a bot command
-        elif message.content in bot_commands.keys():
-            # get the user
-            user = db.get_discord_user("{}#{}".format(message.author.name, message.author.discriminator))
+        elif bot_command in bot_commands.keys():
             # call the function
-            await message.channel.send("@{} {}".format(message.author, bot_commands[message.content](message, user)))
+            await message.channel.send("@{} {}".format(message.author, bot_commands[bot_command](message, user)))
         else:
-            await message.channel.send("@{} type $help for commands".format(message.author))
+            await message.channel.send("@{} type $help for commands".format(message.author.name))
     except Exception as e:
         logger.exception(e)
         raise e

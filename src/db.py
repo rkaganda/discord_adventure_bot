@@ -63,6 +63,17 @@ def get_discord_user(name: str) -> Dict:
     return discord_user
 
 
+def update_user(user: Dict):
+    session = get_session()
+
+    with session() as session:
+        discord_user = session.query(DiscordUser).where(DiscordUser.name == user['name']).first()
+        for key, value in user.items():
+            setattr(discord_user, key, value)
+        session.commit()
+        session.close()
+
+
 
 
 
