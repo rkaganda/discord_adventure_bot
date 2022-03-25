@@ -83,13 +83,13 @@ async def on_message(message):
 
         if message.content in adventure_choices:
             await message.channel.send(
-                "@{} {}".format(message.author, adventures.do_choice(user=user, choice=message.content)))
+                "@{} {}".format(message.author.mention, adventures.do_choice(user=user, choice=message.content)))
         # if the message is a bot command
         elif bot_command in bot_commands.keys():
             # call the function
-            await message.channel.send("@{} {}".format(message.author, bot_commands[bot_command](message, user)))
+            await message.channel.send("@{} {}".format(message.author.mention, bot_commands[bot_command](message, user)))
         else:
-            await message.channel.send("@{} type $help for commands".format(message.author.name))
+            await message.channel.send("@{} type $help for commands".format(message.author.mention))
     except Exception as e:
         logger.exception(e)
         raise e
