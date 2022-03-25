@@ -1,0 +1,6 @@
+/test/
+/venv/
+/config/config.yaml
+.idea/
+config/__pycache__/
+src/__pycache__/
