@@ -82,6 +82,17 @@ def start_adventure(user: Dict, adventure_name: str) -> str:
     return do_branch(user)
 
 
+def end_adventure(user: Dict) -> str:
+    message = " you are not currently on an adventure."
+    if user['current_branch'] is not None:
+        user['current_adventure'] = None
+        user['current_branch'] = None
+        db.update_user(user)
+        message = " your current adventure is brought to a sudden and swift conclusion. The End."
+
+    return message
+
+
 def load_adventure(adventure_name: str) -> Dict:
     try:
         with open("{}{}.adv".format(config.settings['adventure_path'], adventure_name), "r") as infile:

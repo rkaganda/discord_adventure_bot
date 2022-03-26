@@ -16,7 +16,9 @@ client = discord.Client()
 
 
 def print_help(message, user: Dict) -> str:
-    return "$start to start a new adventure, $choices to see of your current adventure.".format(
+    return "$start to start a new adventure, " \
+           "$choices to see of your current adventure." \
+           "$end to end your current adventure".format(
         message.author)
 
 
@@ -59,6 +61,10 @@ def add_adventure(message, user: Dict) -> str:
     return response_message
 
 
+def end_adventure(message, user: Dict) -> str:
+    return adventures.end_adventure(user=user)
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -74,7 +80,8 @@ async def on_message(message):
             '$help': print_help,
             '$start': do_new_command,
             '$choices': print_branch,
-            '$add': add_adventure
+            '$add': add_adventure,
+            '$end': end_adventure,
         }
 
         bot_command = message.content.split(' ')[0]
@@ -83,13 +90,13 @@ async def on_message(message):
 
         if message.content in adventure_choices:
             await message.channel.send(
-                "@{} {}".format(message.author.mention, adventures.do_choice(user=user, choice=message.content)))
+                "{} {}".format(message.author.mention, adventures.do_choice(user=user, choice=message.content)))
         # if the message is a bot command
         elif bot_command in bot_commands.keys():
             # call the function
-            await message.channel.send("@{} {}".format(message.author.mention, bot_commands[bot_command](message, user)))
+            await message.channel.send("{} {}".format(message.author.mention, bot_commands[bot_command](message, user)))
         else:
-            await message.channel.send("@{} type $help for commands".format(message.author.mention))
+            await message.channel.send("{} type $help for commands".format(message.author.mention))
     except Exception as e:
         logger.exception(e)
         raise e
