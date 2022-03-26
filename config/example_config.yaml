@@ -1,9 +1,13 @@
 ---
-discord_log_path: "log/discord.log"
-discord_bot_token: "BOT TOKEN"
+admins:
+  - "runningshoes/ruku#3087"
+  - "aaayojojo#5474"
+  -
+adventure_log_path: log/adventures.log
+adventure_path: adventures/
 
-db_log_path: 'log/db.log'
-db_path: 'db/adventure_bot.db'
+db_log_path: log/db.log
+db_path: db/adventure_bot.db
 
-adventure_log_path: 'log/adventures.log'
-adventure_path: 'adventures/'
+discord_bot_token: ""
+discord_log_path: log/discord.log

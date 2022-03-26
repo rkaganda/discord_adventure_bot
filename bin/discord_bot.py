@@ -46,8 +46,8 @@ def print_branch(message, user: Dict) -> str:
 
 def add_adventure(message, user: Dict) -> str:
     response_message = "something went wrong."
-    if user['name'] != 'runningshoes/ruku#3087':  # hacky AF
-        return ""
+    if user['name'] not in config.settings['admins']:
+        return " you don't have those permissions."
 
     current_adventures = adventures.get_adventures()
     logger.debug("current_adventures = {}".format(current_adventures))
