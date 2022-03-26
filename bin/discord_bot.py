@@ -16,10 +16,8 @@ client = discord.Client()
 
 
 def print_help(message, user: Dict) -> str:
-    return "$start to start a new adventure, " \
-           "$choices to see of your current adventure." \
-           "$end to end your current adventure".format(
-        message.author)
+    message = ["{} {}. ".format(k, bot_commands[k]['desc']) for k in bot_commands.keys()]
+    return " ".join(message)
 
 
 def do_new_command(message, user: Dict):
@@ -65,6 +63,15 @@ def end_adventure(message, user: Dict) -> str:
     return adventures.end_adventure(user=user)
 
 
+bot_commands = {
+            '$help': {"function": print_help, "desc": " to see available commands"},
+            '$start': {"function": do_new_command, "desc": " to start a new adventure"},
+            '$choices': {"function": print_branch, "desc": " to where you are in your adventure"},
+            '$end': {"function": end_adventure, "desc": " to end your current adventure"},
+            '$add': {"function": add_adventure, "desc": " to add a new adventure"},
+        }
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -76,13 +83,6 @@ async def on_message(message):
         # if this is the bot
         if message.author == client.user:
             return
-        bot_commands = {
-            '$help': print_help,
-            '$start': do_new_command,
-            '$choices': print_branch,
-            '$add': add_adventure,
-            '$end': end_adventure,
-        }
 
         bot_command = message.content.split(' ')[0]
         user = db.get_discord_user("{}#{}".format(message.author.name, message.author.discriminator))
@@ -94,7 +94,8 @@ async def on_message(message):
         # if the message is a bot command
         elif bot_command in bot_commands.keys():
             # call the function
-            await message.channel.send("{} {}".format(message.author.mention, bot_commands[bot_command](message, user)))
+            await message.channel.send("{} {}".format(
+                message.author.mention, bot_commands[bot_command]['function'](message, user)))
         else:
             await message.channel.send("{} type $help for commands".format(message.author.mention))
     except Exception as e:
